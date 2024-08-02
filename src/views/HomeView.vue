@@ -7,11 +7,10 @@
 
 import moment from 'moment';
 import ReservationTemp from '../components/ReservationTemp.vue';
-import {defineComponent} from "vue";
 import axios from "axios";
 import {config} from "@/config";
 
-export default defineComponent({
+export default {
   components: {
     ReservationTemp,
   },
@@ -40,24 +39,19 @@ export default defineComponent({
   watch: {
     status(newSchedule){
       if (newSchedule === 200){
-        this.fetchData()
+        // this.fetchData()
       }
-    },
-    schedule: {
-
-      /* eslint-disable */
-      handler(newSchedule) {
-        // this.updateConfig();
-      },
-      immediate: true,
     },
   },
   methods: {
     fetchData() {
       const apiUrl = config.url.api.tempData + this.$route.params.id;
-
+console.log('apiUrl',apiUrl)
       return axios.get(apiUrl)
+
           .then((response) => {
+            // console.log('response',response)
+
             this.employers = response.data.employers.data;
             this.services = response.data.services;
             this.schedule = response.data.schedule;
@@ -112,6 +106,6 @@ export default defineComponent({
     this.setCookie()
     this.fetchData()
   }
-})
+}
 </script>
 

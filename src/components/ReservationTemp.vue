@@ -1,17 +1,6 @@
 <template>
   <div class="row justify-center mt-16">
-    <!--    {{ schedule.map(a => a.label) }}-->
-    <!--    {{ datesData }}-->
-    <!--    {{ availabilityData.map(a => a.data) }}-->
-    <!--    {{allowed}}-->
-    <!--    <div v-for="resultItem in availabilityData" :key="resultItem.data[0].dayId">-->
-    <!--      <div v-for="dayData in resultItem.data" :key="dayData.dayId">-->
-    <!--        <p>Day ID: {{ dayData.dayId }}</p>-->
-    <!--        <p>Available Times: {{ dayData.availableTimes.join(', ') }}</p>-->
-    <!--      </div>-->
-    <!--    </div>-->
     <div class="wrapper d-flex flex-column align-center justify-center ">
-<!--      <v-alert closable width="470"  text="..." type="error"></v-alert>-->
       <v-alert v-if="status === 400 && checker === -1"  width="470" closable :text="text" type="warning"></v-alert>
       <v-card
           :loading="loading"
@@ -449,78 +438,48 @@ export default {
     },
     allowedDates() {
       return (date) => {
-
         const dayIndex = date.getDay();
         const daySchedule = this.schedule.find(item => item.id === dayIndex);
-        console.log(daySchedule);
-        let times = []
-        let currentDate = ''
+
         if (
             daySchedule &&
             daySchedule.openingTime !== null &&
             daySchedule.closingTime !== null
         ) {
-          // console.log(daySchedule);
+          const currentDate = moment(date).format('YYYY-MM-DD');
+          const dayId = this.getDayNumber(date);
 
-          this.datesData.push([moment(date).format('YYYY-MM-DD')]);
-          // for (let i = 0; i < this.datesData.length; i++){
-          //   this.orders.map((a) => a.time+a.date)
-          // }
+          const availableTimes = this.availableTimesByDay.filter(time => time.dayId === dayId);
+          const unavailableTimes = this.orders.map(order => order.time + order.date);
 
-          // console.log(this.availableTimesByDay);
-          for (let i = 0; i < this.datesData.length; i++) {
-            currentDate = moment(this.datesData[i][0]); // Convert to a Date object
+          const allowedTimes = availableTimes.filter(time =>
+              !unavailableTimes.includes(time + ':00' + currentDate)
+          );
 
-            // I need to get the times by the dayId now
-            times = this.availableTimesByDay.filter((time) => time.dayId === this.getDayNumber(currentDate)
-                // && !this.orders.map((a) => a.time + a.date).includes(time + ':00' + moment(currentDate).format('YYYY-MM-DD'))
-            );
-            // console.log(times);
-          }
-          // console.log(
-          let allowed = false
+          const isAllowed = this.availabilityData.some(a =>
+              a.data.dayId === dayId && a.data.availableTimes.length > 0
+          );
 
-          let test = this.date !== null ? this.date.getDay() : '';
-          this.allowed = this.availabilityData.some(a => a.data.dayId === test && a.data.availableTimes.length > 0);
-
-          if (this.allowed) {
-            this.checker = 1
-            this.status = null
-            this.text = null
-            Cookies.set('checker', 0)
-            console.log('There are available times. ' + this.checker);
-          } else {
-
-
-            if (this.date !== null && Cookies.get('checker') === '0'){
-              this.checker = -1
-              this.text = 'All times are booked.'
-              // this.date = null;
-              this.status =  400
-            }
-            console.log('All times are booked. ' + this.checker);
-
-
+          if (isAllowed) {
+            this.checker = 1;
+            this.status = null;
+            this.text = null;
+            Cookies.set('checker', 0);
+          } else if (this.date !== null && Cookies.get('checker') === '0') {
+            this.checker = -1;
+            this.text = 'All times are booked.';
+            this.status = 400;
           }
 
-          const dayId = this.availableTimesByDay.map(a => a.dayId);
-          return times.filter((time) => dayId === this.getDayNumber(currentDate._i) && !this.orders.map((a) => a.time + a.date).includes(time + ':00' + moment(currentDate._i).format('YYYY-MM-DD')));
-
+          return allowedTimes.length > 0;
         }
 
-        // return daySchedule && daySchedule.openingTime !== null && daySchedule.closingTime !== null //&& this.orders.map((a) => a.time+a.date).includes() !this.orders.some(a => a.date === moment(date).format('YYYY-MM-DD') && a.time === formattedTime) //&& !this.orders.map((a) => a.time+a.date).includes(time + ':00'+moment(this.date).format('YYYY-MM-DD'));
+        return false;
       };
-    },
-    isMobileC() {
-      if (this.isMobile()) {
-        return true
-      }
-      return false
     }
+
+
   },
-  created() {
-    // this.updateConfig();
-  }
 };
 </script>
 <style>
