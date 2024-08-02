@@ -215,6 +215,7 @@ import axios from 'axios';
 import 'flatpickr/dist/flatpickr.css';
 import moment from 'moment';
 import {config} from "@/config";
+// eslint-disable-next-line no-unused-vars
 import Cookies from "js-cookie"
 // import config from '../config'
 
@@ -456,27 +457,13 @@ export default {
               !unavailableTimes.includes(time + ':00' + currentDate)
           );
 
-          const isAllowed = this.availabilityData.some(a =>
-              a.data.dayId === dayId && a.data.availableTimes.length > 0
-          );
-
-          if (isAllowed) {
-            this.checker = 1;
-            this.status = null;
-            this.text = null;
-            Cookies.set('checker', 0);
-          } else if (this.date !== null && Cookies.get('checker') === '0') {
-            this.checker = -1;
-            this.text = 'All times are booked.';
-            this.status = 400;
-          }
-
           return allowedTimes.length > 0;
         }
 
         return false;
       };
     }
+
 
 
   },

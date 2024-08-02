@@ -39,7 +39,7 @@ export default {
   watch: {
     status(newSchedule){
       if (newSchedule === 200){
-        // this.fetchData()
+        this.fetchData()
       }
     },
   },
